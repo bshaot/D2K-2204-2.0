@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 
+
 namespace D2K_2204_2._0
 {
     public partial class Form1 : Form
@@ -17,6 +18,11 @@ namespace D2K_2204_2._0
         short m_dev = -1;
         ushort cardT = 0;
         ushort cardnum = 0;
+
+        ushort CHANNELCOUNT = 4;  //定义采集的通道数
+        ushort i;
+        ushort[] chans = new ushort[64];
+
 
         public Form1()
         {
@@ -60,6 +66,11 @@ namespace D2K_2204_2._0
                 return;
             }
 
+            for (i = 0; i < CHANNELCOUNT; i++)                                        //初始化chans向量
+            {
+                chans[i] = i;  //ascending
+            }
+
             button2.Enabled = true;                                //停止键使能
             timer1.Enabled = true;                                 //打开定时间开始采集数据                                             
         }
@@ -100,12 +111,12 @@ namespace D2K_2204_2._0
             }
         }
 
-        private void textBox1_TextChanged(object sender, EventArgs e)
+        private void TextBox1_TextChanged(object sender, EventArgs e)
         {
 
         }
 
-        private void timer1_Tick(object sender, EventArgs e)
+        private void Timer1_Tick(object sender, EventArgs e)
         {
             //short err;
 
@@ -113,22 +124,42 @@ namespace D2K_2204_2._0
             {
                 return;
             }
-            DataCollect((ushort)m_dev, 0);
+            DataCollect((ushort)m_dev, chans);
         }
 
-        private void DataCollect(ushort DC_cardnum, ushort DC_chnum)               //采集不同通道电压的函数
+        private void DataCollect(ushort DC_cardnum, ushort[] DC_chnum)               //采集不同通道电压的函数
         {
             string str_tmp;
             short err;
-            double voltage;
-            err = D2KDASK.D2K_AI_VReadChannel(DC_cardnum, DC_chnum, out voltage);         //输出通道1电压
+            //double voltage;
+            // err = D2KDASK.D2K_AI_VReadChannel(DC_cardnum, DC_chnum, out voltage);         //输出通道1电压
+            //if (err < 0)
+            //{
+            //   MessageBox.Show("D2K_AI_VReadChannel error!");
+            //    return;
+            //}
+            //str_tmp = string.Format("{0}", voltage);
+            //textBox1.Text = str_tmp;
+
+
+            ushort[] chan_data = new ushort[4];
+            double[] chan_voltage = new double[4];
+            err = D2KDASK.D2K_AI_ScanReadChannels(DC_cardnum, CHANNELCOUNT, chans, chan_data);
             if (err < 0)
             {
-                MessageBox.Show("D2K_AI_VReadChannel error!");
+                MessageBox.Show("D2K_AI_ScanReadChannels error!");
                 return;
             }
-            str_tmp = string.Format("{0}", voltage);
-            textBox1.Text = str_tmp;
+            for (int i = 0; i < CHANNELCOUNT; i++)
+            {
+                chan_voltage[i] = (double)(chan_data[i]) / 32768 * 10.0;
+                str_tmp = string.Format("{0}", chan_voltage[i]);
+                TextBox txt = this.Controls["textBox" + i + 1.ToString()] as TextBox;
+                if (txt != null)
+                {
+                    txt.Text = str_tmp;
+                }
+            }
         }
     }
 }
