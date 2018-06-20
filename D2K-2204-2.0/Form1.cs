@@ -19,9 +19,9 @@ namespace D2K_2204_2._0
         ushort cardT = 0;
         ushort cardnum = 0;
 
-        ushort CHANNELCOUNT = 4;  //定义采集的通道数
+        ushort CHANNELCOUNT = 116;  //定义采集的通道数
         ushort i;
-        ushort[] chans = new ushort[64];
+        ushort[] chans = new ushort[128];
 
 
         public Form1()
@@ -111,6 +111,25 @@ namespace D2K_2204_2._0
             }
         }
 
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            for (i = 0; i < CHANNELCOUNT; i++)                                        //初始化chans向量
+            {
+                chans[i] = i;  //ascending
+            }
+            for (int i = 0; i < CHANNELCOUNT; i++)
+            {
+                string str_tmp;
+                str_tmp = string.Format("{0}", chans[i]);
+                TextBox txt = this.Controls["TextBox" + (i + 1).ToString()] as TextBox;
+                if (txt != null)
+                {
+                    txt.Text = str_tmp;
+                }
+            }
+        }
+
         private void TextBox1_TextChanged(object sender, EventArgs e)
         {
 
@@ -154,12 +173,14 @@ namespace D2K_2204_2._0
             {
                 chan_voltage[i] = (double)(chan_data[i]) / 32768 * 10.0;
                 str_tmp = string.Format("{0}", chan_voltage[i]);
-                TextBox txt = this.Controls["textBox" + i + 1.ToString()] as TextBox;
+                TextBox txt = this.Controls["TextBox" + (i + 1).ToString()] as TextBox;
                 if (txt != null)
                 {
                     txt.Text = str_tmp;
                 }
             }
         }
+
+       
     }
 }
